@@ -1,4 +1,4 @@
-# 🌿 BotanistJR - Plant Identification Web App
+#  BotanistJR - Plant Identification Web App
 
 BotanistJR is a Flask-based web application that allows users to **register, log in, and identify plants** by uploading images. It uses the **PlantNet API** to analyze images and return plant names with confidence scores.
 
