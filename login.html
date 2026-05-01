@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Botanistjr2 - Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --green-deep:    #091a10;
+      --green-dark:    #0d2018;
+      --green-mid:     #1d6b30;
+      --green-bright:  #2d9a46;
+      --green-glow:    rgba(50,200,90,0.18);
+      --green-text:    #c8ecd4;
+      --green-muted:   rgba(100,200,130,0.55);
+      --green-accent:  #6dda8a;
+      --leaf-border:   rgba(80,180,100,0.25);
+      --input-bg:      rgba(20,50,28,0.65);
+      --card-bg:       rgba(12,30,18,0.97);
+      --error-bg:      rgba(200,80,60,0.14);
+      --error-border:  rgba(220,100,80,0.35);
+      --error-text:    #f08878;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Cormorant Garamond', serif;
+      background: radial-gradient(ellipse at 30% 20%, #0f2a18 0%, #091a10 50%, #050f08 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── BACKGROUND ── */
+    .bg-layer { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+
+    .bokeh {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(70px);
+      animation: bokehDrift ease-in-out infinite;
+    }
+    .b1 { width:320px;height:320px;background:rgba(28,110,55,0.2);  top:-90px; left:-80px; animation-duration:9s; }
+    .b2 { width:220px;height:220px;background:rgba(18,90,44,0.16);  bottom:-70px;right:-50px;animation-duration:12s; }
+    .b3 { width:160px;height:160px;background:rgba(40,155,75,0.12); top:45%; right:8%;  animation-duration:7s; }
+    .b4 { width:100px;height:100px;background:rgba(60,200,100,0.09);top:20%; left:15%; animation-duration:10s; }
+
+    @keyframes bokehDrift {
+      0%,100% { transform:translate(0,0) scale(1); }
+      50%      { transform:translate(18px,-28px) scale(1.12); }
+    }
+
+    .scanlines {
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.025) 2px,rgba(0,0,0,0.025) 4px);
+      pointer-events: none; z-index: 1;
+    }
+
+    .particle {
+      position: fixed;
+      border-radius: 50%;
+      background: rgba(80,200,110,0.45);
+      pointer-events: none;
+      animation: particleDrift linear infinite;
+    }
+    @keyframes particleDrift {
+      from { transform: translateY(102vh) rotate(0deg); opacity:0; }
+      8%   { opacity: 0.7; }
+      92%  { opacity: 0.4; }
+      to   { transform: translateY(-5vh) rotate(360deg); opacity:0; }
+    }
+
+    /* ── SCENE & CARD ── */
+    .scene {
+      position: relative;
+      perspective: 1400px;
+      z-index: 10;
+    }
+
+    .card-3d {
+      width: 430px;
+      background: var(--card-bg);
+      border: 1px solid var(--leaf-border);
+      border-radius: 26px;
+      padding: 60px 46px 50px;
+      position: relative;
+      transform-style: preserve-3d;
+      transform: rotateX(4deg) rotateY(-2deg);
+      box-shadow:
+        0 50px 90px rgba(0,0,0,0.75),
+        0 0 70px var(--green-glow),
+        inset 0 1px 0 rgba(120,220,140,0.12);
+      animation: floatCard 7s ease-in-out infinite;
+      transition: transform 0.35s ease, box-shadow 0.35s ease;
+      will-change: transform;
+    }
+
+    .card-3d:hover {
+      box-shadow:
+        0 70px 110px rgba(0,0,0,0.85),
+        0 0 110px rgba(40,190,85,0.22),
+        inset 0 1px 0 rgba(150,245,170,0.18);
+    }
+
+    @keyframes floatCard {
+      0%,100% { transform:rotateX(4deg) rotateY(-2deg) translateY(0px); }
+      50%      { transform:rotateX(2deg) rotateY(1deg)  translateY(-9px); }
+    }
+
+    /* glass sheen */
+    .card-3d::before {
+      content:'';
+      position:absolute; top:0;left:0;right:0; height:48%;
+      background:linear-gradient(180deg,rgba(100,220,120,0.045) 0%,transparent 100%);
+      border-radius:26px 26px 0 0;
+      pointer-events:none;
+    }
+
+    /* ── EMBLEM ── */
+    .emblem {
+      position: absolute;
+      top: -30px; left: 50%;
+      transform: translateX(-50%);
+      width: 60px; height: 60px;
+      background: linear-gradient(135deg, #195826, #2d8a45);
+      border-radius: 50% 0 50% 0;
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid rgba(100,225,125,0.38);
+      box-shadow: 0 8px 30px rgba(28,110,55,0.55), 0 0 24px rgba(60,200,100,0.3);
+      animation: emblemPulse 3.5s ease-in-out infinite;
+      z-index: 2;
+    }
+    @keyframes emblemPulse {
+      0%,100% { box-shadow:0 8px 30px rgba(28,110,55,0.55),0 0 24px rgba(60,200,100,0.3); }
+      50%      { box-shadow:0 10px 44px rgba(30,140,70,0.75),0 0 44px rgba(60,220,100,0.5); }
+    }
+
+    /* ── HEADER ── */
+    .brand-title {
+      text-align: center;
+      margin-top: 16px;
+      font-family: 'Playfair Display', serif;
+      font-size: 28px; font-weight: 700;
+      letter-spacing: 1.5px;
+      background: linear-gradient(135deg, #60d080 0%, #aaf0c0 50%, #60d080 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmerText 4s ease-in-out infinite;
+      background-size: 200% 100%;
+    }
+    @keyframes shimmerText {
+      0%,100% { background-position: 0% 50%; }
+      50%      { background-position: 100% 50%; }
+    }
+
+    .brand-tagline {
+      text-align: center;
+      font-size: 11px; letter-spacing: 5px;
+      color: var(--green-muted);
+      text-transform: uppercase;
+      margin-top: 5px; margin-bottom: 34px;
+    }
+
+    .divider {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 34px;
+    }
+    .div-line {
+      flex: 1; height: 1px;
+      background: linear-gradient(90deg,transparent,rgba(80,180,100,0.28),transparent);
+    }
+    .div-gem {
+      width: 5px; height: 5px;
+      background: rgba(100,200,120,0.45);
+      border-radius: 50%;
+      box-shadow: 0 0 6px rgba(80,200,110,0.4);
+    }
+
+    /* ── FLASH MESSAGE ── */
+    .flash-msg {
+      background: var(--error-bg);
+      border: 1px solid var(--error-border);
+      border-radius: 11px;
+      padding: 11px 16px;
+      margin-bottom: 22px;
+      font-size: 13.5px;
+      color: var(--error-text);
+      letter-spacing: 0.3px;
+      animation: flashIn 0.4s ease;
+    }
+    @keyframes flashIn {
+      from { opacity:0; transform:translateY(-8px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    /* ── FORM FIELDS ── */
+    .field-group { position: relative; margin-bottom: 20px; }
+
+    .field-label {
+      display: block;
+      font-size: 11px; letter-spacing: 3.5px;
+      text-transform: uppercase;
+      color: rgba(100,185,125,0.65);
+      margin-bottom: 8px;
+    }
+
+    .field-wrap { position: relative; display: flex; align-items: center; }
+
+    .field-icon {
+      position: absolute; left: 14px;
+      width: 16px; height: 16px;
+      opacity: 0.42; pointer-events: none; z-index: 2;
+    }
+
+    .input-3d {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid rgba(60,150,80,0.22);
+      border-radius: 13px;
+      padding: 14px 16px 14px 44px;
+      color: var(--green-text);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 16px; letter-spacing: 0.4px;
+      outline: none;
+      transition: border-color 0.28s, background 0.28s, transform 0.22s, box-shadow 0.28s;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.32), inset 0 1px 0 rgba(255,255,255,0.03);
+    }
+    .input-3d::placeholder { color: rgba(100,165,120,0.32); font-style: italic; }
+    .input-3d:focus {
+      border-color: rgba(80,205,115,0.5);
+      background: rgba(20,58,32,0.78);
+      transform: translateY(-1.5px);
+      box-shadow:
+        inset 0 2px 8px rgba(0,0,0,0.3),
+        0 0 0 3px rgba(55,180,90,0.13),
+        0 0 22px rgba(55,200,90,0.1);
+    }
+
+    /* ── BUTTON ── */
+    .btn-login {
+      width: 100%;
+      margin-top: 30px;
+      padding: 15px;
+      background: linear-gradient(135deg, #1b6430 0%, #2d9a46 50%, #1b6430 100%);
+      background-size: 200% 100%;
+      border: 1px solid rgba(80,205,115,0.32);
+      border-radius: 13px;
+      color: #b6f0c6;
+      font-family: 'Playfair Display', serif;
+      font-size: 14.5px; font-weight: 700;
+      letter-spacing: 4px; text-transform: uppercase;
+      cursor: pointer;
+      position: relative; overflow: hidden;
+      transition: background-position 0.45s ease, transform 0.22s ease, box-shadow 0.3s ease, color 0.3s;
+      box-shadow: 0 4px 22px rgba(28,115,58,0.38), inset 0 1px 0 rgba(160,240,180,0.14);
+    }
+    .btn-login:hover {
+      background-position: -100% 0;
+      transform: translateY(-2.5px);
+      color: #d8fce8;
+      box-shadow: 0 10px 36px rgba(30,150,70,0.52), 0 0 44px rgba(50,200,90,0.22), inset 0 1px 0 rgba(200,255,220,0.2);
+    }
+    .btn-login:active { transform: translateY(0) scale(0.975); }
+
+    .btn-ripple {
+      position: absolute;
+      background: rgba(180,255,200,0.28);
+      border-radius: 50%;
+      transform: translate(-50%,-50%) scale(0);
+      animation: rippleAnim 0.65s ease-out forwards;
+      pointer-events: none;
+    }
+    @keyframes rippleAnim {
+      to { transform: translate(-50%,-50%) scale(4); opacity:0; width:300px; height:300px; }
+    }
+
+    /* spinner inside button */
+    .btn-spinner {
+      display: none;
+      width: 18px; height: 18px;
+      border: 2px solid rgba(180,255,200,0.3);
+      border-top-color: #b6f0c6;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto;
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    /* ── FOOTER LINK ── */
+    .register-link {
+      text-align: center;
+      margin-top: 26px;
+      font-size: 13.5px;
+      color: rgba(120,180,140,0.48);
+      letter-spacing: 0.3px;
+    }
+    .register-link a {
+      color: rgba(100,215,135,0.78);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(100,215,135,0.22);
+      padding-bottom: 1px;
+      transition: color 0.25s, border-color 0.25s, text-shadow 0.25s;
+    }
+    .register-link a:hover {
+      color: #7de8a0;
+      border-bottom-color: rgba(120,235,155,0.55);
+      text-shadow: 0 0 14px rgba(70,220,110,0.45);
+    }
+
+    /* ── CORNER VINES ── */
+    .vine { position: absolute; pointer-events: none; opacity: 0.18; }
+    .vine-tl { top: 16px; left: 16px; transform: rotate(0deg); }
+    .vine-br { bottom: 16px; right: 16px; transform: rotate(180deg); }
+
+    /* ── CARD ENTRY ANIMATION ── */
+    .scene { animation: sceneIn 0.9s cubic-bezier(0.22,1,0.36,1) both; }
+    @keyframes sceneIn {
+      from { opacity:0; transform: perspective(1400px) translateY(40px) rotateX(12deg); }
+      to   { opacity:1; transform: perspective(1400px) translateY(0)   rotateX(0deg); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Background layers -->
+<div class="bg-layer">
+  <div class="bokeh b1"></div>
+  <div class="bokeh b2"></div>
+  <div class="bokeh b3"></div>
+  <div class="bokeh b4"></div>
+</div>
+<div class="scanlines"></div>
+
+<!-- 3D Login Card -->
+<div class="scene">
+  <div class="card-3d" id="card">
+
+    <!-- Corner vine accents -->
+    <svg class="vine vine-tl" width="48" height="48" viewBox="0 0 48 48" fill="none">
+      <path d="M4 44 C4 24 12 12 28 4" stroke="#5dc87a" stroke-width="1.5" stroke-linecap="round"/>
+      <circle cx="10" cy="34" r="3" fill="#5dc87a"/>
+      <circle cx="20" cy="18" r="2.5" fill="#5dc87a"/>
+    </svg>
+    <svg class="vine vine-br" width="48" height="48" viewBox="0 0 48 48" fill="none">
+      <path d="M4 44 C4 24 12 12 28 4" stroke="#5dc87a" stroke-width="1.5" stroke-linecap="round"/>
+      <circle cx="10" cy="34" r="3" fill="#5dc87a"/>
+      <circle cx="20" cy="18" r="2.5" fill="#5dc87a"/>
+    </svg>
+
+    <!-- Emblem -->
+    <div class="emblem">
+      <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
+        <path d="M15 26 C15 26 4 19 4 11 C4 6 9 2 15 2 C21 2 26 6 26 11 C26 19 15 26 15 26Z" fill="rgba(180,255,200,0.88)"/>
+        <line x1="15" y1="26" x2="15" y2="8" stroke="rgba(28,90,45,0.85)" stroke-width="1.6" stroke-linecap="round"/>
+        <line x1="15" y1="15" x2="11" y2="11" stroke="rgba(28,90,45,0.6)" stroke-width="1.2" stroke-linecap="round"/>
+        <line x1="15" y1="18" x2="19" y2="14" stroke="rgba(28,90,45,0.6)" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <h1 class="brand-title">Botanistjr2</h1>
+    <p class="brand-tagline">Botanical Portal</p>
+
+    <div class="divider">
+      <div class="div-line"></div>
+      <div class="div-gem"></div>
+      <div class="div-line"></div>
+    </div>
+
+    <!-- Flash messages (Django Jinja2) -->
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash-msg">{{ messages[0] }}</div>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" id="loginForm">
+      {{ form.hidden_tag() if form }}
+
+      <!-- Username -->
+      <div class="field-group">
+        <label class="field-label" for="username">Username</label>
+        <div class="field-wrap">
+          <svg class="field-icon" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="5.5" r="3" stroke="rgba(100,200,130,0.75)" stroke-width="1.3"/>
+            <path d="M2 14.5c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="rgba(100,200,130,0.75)" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+          <input class="input-3d" id="username" type="text" name="username" placeholder="Enter your username" required autocomplete="username">
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="field-group">
+        <label class="field-label" for="password">Password</label>
+        <div class="field-wrap">
+          <svg class="field-icon" viewBox="0 0 16 16" fill="none">
+            <rect x="3" y="7.5" width="10" height="7.5" rx="2" stroke="rgba(100,200,130,0.75)" stroke-width="1.3"/>
+            <path d="M5.5 7.5v-2a2.5 2.5 0 015 0v2" stroke="rgba(100,200,130,0.75)" stroke-width="1.3" stroke-linecap="round"/>
+            <circle cx="8" cy="11.5" r="1.2" fill="rgba(100,200,130,0.75)"/>
+          </svg>
+          <input class="input-3d" id="password" type="password" name="password" placeholder="Enter your password" required autocomplete="current-password">
+        </div>
+      </div>
+
+      <button class="btn-login" type="submit" id="loginBtn">
+        <span id="btnText">Enter Garden</span>
+        <div class="btn-spinner" id="btnSpinner"></div>
+      </button>
+    </form>
+
+    <p class="register-link">New cultivator? <a href="/register">Register here</a></p>
+  </div>
+</div>
+
+<script>
+  /* ── 3D MOUSE TILT ── */
+  const card = document.getElementById('card');
+  let animating = true;
+
+  document.addEventListener('mousemove', (e) => {
+    animating = false;
+    card.style.animation = 'none';
+    const cx = window.innerWidth / 2;
+    const cy = window.innerHeight / 2;
+    const dx = (e.clientX - cx) / cx;
+    const dy = (e.clientY - cy) / cy;
+    card.style.transform = `rotateX(${dy * -9}deg) rotateY(${dx * 11}deg)`;
+  });
+
+  document.addEventListener('mouseleave', () => {
+    card.style.animation = 'floatCard 7s ease-in-out infinite';
+    card.style.transform = '';
+  });
+
+  /* ── RIPPLE ── */
+  document.getElementById('loginBtn').addEventListener('click', function(e) {
+    const r = document.createElement('div');
+    r.className = 'btn-ripple';
+    const rect = this.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height) * 2;
+    r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-rect.left}px;top:${e.clientY-rect.top}px;`;
+    this.appendChild(r);
+    setTimeout(() => r.remove(), 700);
+  });
+
+  /* ── SUBMIT LOADING STATE ── */
+  document.getElementById('loginForm').addEventListener('submit', () => {
+    document.getElementById('btnText').style.display = 'none';
+    document.getElementById('btnSpinner').style.display = 'block';
+  });
+
+  /* ── AMBIENT PARTICLES ── */
+  function spawnParticle() {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const s = Math.random() * 3 + 1;
+    p.style.cssText = `width:${s}px;height:${s}px;left:${Math.random()*100}vw;animation-duration:${Math.random()*12+8}s;animation-delay:${Math.random()*4}s;opacity:${Math.random()*0.4+0.15};`;
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 20000);
+  }
+  for (let i = 0; i < 14; i++) spawnParticle();
+  setInterval(spawnParticle, 900);
+</script>
+</body>
+</html>
